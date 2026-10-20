@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Для тебя</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #ffe6e6, #ffb3c6, #ff8fab);
+    font-family: 'Georgia', serif;
+    overflow: hidden;
+    padding: 20px;
+  }
+
+  /* Падающие лепестки */
+  .petal {
+    position: absolute;
+    background: #ffc2d1;
+    border-radius: 100% 0 100% 0;
+    opacity: 0.7;
+    animation: fall linear infinite;
+    z-index: 1;
+  }
+  @keyframes fall {
+    to { transform: translateY(100vh) rotate(360deg); }
+  }
+
+  /* Сама открытка */
+  .card {
+    position: relative;
+    z-index: 10;
+    background: #fffdfa;
+    max-width: 500px;
+    width: 100%;
+    padding: 40px 30px;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(219, 112, 147, 0.3);
+    text-align: center;
+    border: 1px solid #ffd1dc;
+  }
+
+  .heart-icon {
+    font-size: 40px;
+    margin-bottom: 15px;
+    animation: beat 1.2s infinite;
+    display: inline-block;
+  }
+  @keyframes beat {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+  }
+
+  #typing-text {
+    font-size: 19px;
+    line-height: 1.7;
+    color: #4a3b42;
+    min-height: 180px;
+    white-space: pre-wrap;
+    font-style: italic;
+  }
+
+  .cursor {
+    display: inline-block;
+    width: 2px;
+    height: 20px;
+    background: #d6336c;
+    animation: blink 1s infinite;
+    vertical-align: text-bottom;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* Кнопки */
+  .buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 25px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.8s ease;
+  }
+  .buttons.show { opacity: 1; pointer-events: auto; }
+
+  button {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 30px;
+    font-size: 16px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform 0.2s;
+  }
+  .btn-yes {
+    background: #d6336c;
+    color: white;
+    box-shadow: 0 4px 15px rgba(214, 51, 108, 0.4);
+  }
+  .btn-yes:hover { transform: scale(1.05); }
+  .btn-no {
+    background: #e9ecef;
+    color: #6c757d;
+  }
+
+  /* Салют */
+  #fireworks {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 999;
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+  <canvas id="fireworks"></canvas>
+
+  <div class="card" id="main-card">
+    <div class="heart-icon">💌</div>
+    <div id="typing-text"></div>
+    <div class="buttons" id="buttons">
+      <button class="btn-yes" onclick="startFireworks()">Да ❤️</button>
+      <button class="btn-no" onclick="tryAgain()">Подумать 🤔</button>
+    </div>
+  </div>
+
+<script>
+  // --- 1. Эффект падающих лепестков ---
+  function createPetal() {
+    const petal = document.createElement('div');
+    petal.classList.add('petal');
+    petal.style.left = Math.random() * 100 + 'vw';
+    petal.style.top = '-20px';
+    petal.style.width = Math.random() * 15 + 10 + 'px';
+    petal.style.height = petal.style.width;
+    petal.style.animationDuration = Math.random() * 3 + 4 + 's';
+    petal.style.opacity = Math.random() * 0.5 + 0.3;
+    document.body.appendChild(petal);
+    setTimeout(() => petal.remove(), 8000);
+  }
+  setInterval(createPetal, 300);
+
+  // --- 2. Набор текста ---
+  const text = "Я долго думал, как сказать тебе это...\nМой код работает идеально, но сердце дает сбой каждый раз, когда я вижу тебя.\n\nТы станешь моей девушкой?";
+  const target = document.getElementById('typing-text');
+  const buttons = document.getElementById('buttons');
+  let i = 0;
+  let isTyping = false;
+
+  function typeWriter() {
+    if (i < text.length) {
+      target.innerHTML = text.substring(0, i + 1) + '<span class="cursor"></span>';
+      i++;
+      setTimeout(typeWriter, text[i] === '\n' ? 400 : 50); // пауза на переносе строки
+    } else {
+      target.innerHTML = text + '<span class="cursor"></span>';
+      buttons.classList.add('show');
+    }
+  }
+
+  // Запуск печати через 1 секунду
+  setTimeout(() => {
+    target.innerHTML = '<span class="cursor"></span>';
+    typeWriter();
+  }, 1000);
+
+  // --- 3. Кнопка "Подумать" ---
+  function tryAgain() {
+    const btnNo = document.querySelector('.btn-no');
+    btnNo.innerText = "Ну пожалуйста 🥺";
+    target.innerHTML = "Я буду ждать столько, сколько нужно...<br>Но мой ответ уже навсегда останется 'Да' ❤️";
+  }
+
+  // --- 4. Салют (Кнопка "Да") ---
+  function startFireworks() {
+    document.getElementById('buttons').style.display = 'none';
+    target.innerHTML = "Ты сделала меня самым счастливым! 🎉<br>Я тебя очень люблю! ❤️";
+    document.getElementById('fireworks').style.display = 'block';
+    
+    // Логика салюта
+    const canvas = document.getElementById('fireworks');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    let particles = [];
+    function createFirework(x, y) {
+      const colors = ['#d6336c', '#ff8fab', '#ffc2d1', '#ffd700', '#ff1493'];
+      for (let i = 0; i < 50; i++) {
+        particles.push({
+          x: x, y: y,
+          vx: (Math.random() - 0.5) * 10,
+          vy: (Math.random() - 0.5) * 10,
+          life: Math.random() * 100 + 50,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          size: Math.random() * 3 + 2
+        });
+      }
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach((p, index) => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.1; // гравитация
+        p.life--;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.fill();
+        if (p.life <= 0) particles.splice(index, 1);
+      });
+      requestAnimationFrame(animate);
+    }
+    
+    // Запускаем салют несколько раз
+    setInterval(() => {
+      createFirework(Math.random() * canvas.width, Math.random() * canvas.height * 0.6);
+    }, 600);
+    
+    animate();
+  }
+</script>
+</body>
+</html>
